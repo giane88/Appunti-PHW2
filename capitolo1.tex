@@ -332,3 +332,52 @@ L'algoritmo di PODEM si svolge in 6 passi:
 \end{enumerate}
 Per un esempio completo si rimanda alle slide del corso.
 \subsection{Generazione dei test nei circuiti sequenziali}
+Passiamo ora alla generazione dei test per circuiti sequenziali. Nei circuiti sequenziali sono presenti degli elementi di memoria il cui valore non è noto e perciò è necessario introdurre più vettori di test in sequenza che permettano di portare questi elementi in uno stato cososciuto e successivamente testare i guasti. Un esempio di questa tecnica è mostrato in \figurename\,\ref{fig:seqexemp} dove vediamo che dopo aver inserito agli ingressi il vettore \emph{1-1} non riusciamo ad individuare il valore dell'uscita ma possiamo inizializzare il flip-flop ad un valore noto. A questo punto è possibile applicare un secondo vettore di test per testare il guasto.
+\begin{figure}
+\centering
+\includegraphics[scale=0.4]{img/seqexemp.png}
+\caption{Esempio di circuito sequenziale}\label{fig:seqexemp}
+\end{figure}
+Per effettuare il test dei circuiti sequenziali come abbiamo detto è necessario applicare più vettori, ma per farlo dobbiamo applicare la \emph{time-frame expansion} che in pratica non fa altro che replicare \emph{n-volte} il circuito da testare (dove \emph{n} il numero di vettori di test) inserisce il guasto in ogni circuito ed infine genera i vettori di test utilizzando sia l'algebra di Roth che quella di Muth. Questo meccanismo permette di esplicitare il tempo tuttavia non si riesce a sapere a priori il numero di replicazioni necessarie.\\
+Il meccanismo di risoluzione è molto simile ai precedenti:
+\begin{itemize}
+\item Si selezione un uscita sulla quale esporre il guasto.
+\item Si posiziona il valore logico, 1/0 o 0/1 in base al tipo di guasto e al numero di inversioni.
+\item Si giustificano le linee partendo dalle uscite e andando a ritroso verso gli ingressi.
+\item Se non è possibile effettuare la giustificazione si seleziona una nuova uscita tramite la derivabilità.
+\item Se tale tecnica fallisce per tutte le uscite raggiungibili allora il guasto è non testabile.
+\item Se i valori 1/0 o 0/1 non sono giustificabili ma i valori 1/X o 0/X lo sono allora il guasto diventa \emph{potentially detectable}.
+\end{itemize}
+\begin{figure}
+\centering
+\includegraphics[scale=0.4]{img/simumeth.png}
+\caption{Generazione dei vettori di test tramite simulazione}\label{fig:simumeth}
+\end{figure}
+Possiamo fare una distinzione tra i circuiti sequenziali, possiamo avere circuiti \emph{cycle-free} ovvero senza cicli nei quali non vi è alcun feedback tra i diversi flip-flop, in questo caso la generazione dei vettori è molto più semplice e richiede al massimo un espansione pari a $1+dseq$ dove \emph{dseq} è il grado di dipendenza dei \emph{ff}. Nel caso di circuiti con \emph{cicli} le cose si complicano ed è necessaria un espansione di $9^{N\_ff}$ dove \emph{N\_ff} è il numero di flip flop.\\
+Analizziamo ora i diversi algoritmi per la generazione dei test nei circuiti sequenziali, questi algoritmi non sono algoritmi esatti come quelli utilizzati per i circuiti combinatori ma sfruttano la simulazione per trovare dei risultati. L'utilizzo della simulazione è dovuto al fatto che le sequenze da inizializzare sono molto lunghe ed è impossibile utilizzare un albero delle decisioni, inoltre i modelli dei circuiti sono limitati e l'espansione porta a raggiungere tali limiti molto in fretta; infine problemi di complessità e di corsa alle risorse rende il metodo \emph{time-frame} inutilizzabile.\\
+I metodi basati sulla simulazione invece sfruttano le già collaudate tecnologie di simulazione dei guasti inoltre i modelli sono già stati creati e verificati, le metodologie che si possono utilizzare sono diverse.
+Un diagramma che riassume tale metodologia è mostrato in \figurename\,\ref{fig:simumeth}.
+\subsubsection{Metodo Contest}
+In questo tipo di simulazione vengono testati più vettori concorrentemente e vengono via via migliorati tramite l'utilizzo di una \emph{funzione di costo}. Tale metodo si suddivide in tre fasi:
+\begin{itemize}
+\item Una fase \emph{iniziale} nella quale non si tiene conto di nessun guasto e la funzione di costo viene calcolata con il circuito allo stato originale
+\item Fase \emph{concorrente} vengono introdotti tutti i guasti, la funzione di costo viene calcolata in modo concorrente su più simulazioni.
+\item Fase \emph{singolo guasto}, in questa fase si analizza un solo guasto alla volta utilizzando i valori della simulazione.
+\end{itemize}
+La funzione di costo definisce l'obiettivo che si vuole perseguire come l'inizializzazione dei vettori o la testabilità di un guasto, la funzione di costo si annulla quando i vettori trovati rispettano l'obiettivo.
+Un esempio molto banale del meccanismo è mostrato in \figurename\,\ref{fig:contest}.\\
+\begin{figure}
+\centering
+\includegraphics[scale=0.4]{img/contest.png}
+\caption{Esempio di ricerca tramite funzione obiettivo}\label{fig:contest}
+\end{figure}
+\subsubsection{Algoritmo genetico}
+L'algoritmo genetico afferma che una \emph{popolazione} migliora con ogni \emph{generazione}. 
+Nel caso di generazione di vettori di test la popolazione è per l'appunto un insieme di vettori, il fattore di miglioramento è una qualità misurabile come una funzione di costo. Al funzione di rigenerazione invece viene trovata in modo euristico considerando i vettori più \emph{promettenti} e trasformandoli.
+\subsubsection{Metodo spettrale}
+Il \emph{metodo spettrale} si può considerare un evoluzione di quello genetico. Si parte da un insieme casuale di vettori di test si effettua un compattamento eliminando quelli non necessari o quelli ridondanti, dopo di che si simulano i diversi vettori. Lo schema di tale meccanismo è mostrato in \figurename\,\ref{fig:spectralmet}.
+\begin{figure}
+\centering
+\includegraphics[scale=0.4]{img/spectralmeth.png}
+\caption{Schema di riepilogazione del meccanismo spettrale}\label{fig:spectralmet}
+\end{figure}
